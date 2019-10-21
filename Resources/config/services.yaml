@@ -1,0 +1,6 @@
+services:
+  lcv.ignore_soft_delete_listener:
+    class: LCV\DoctrineODMSoftDeleteBundle\Annotation\IgnoreSoftDeleteListener
+    arguments: ["@annotations.reader", "@doctrine_mongodb.odm.default_document_manager"]
+    tags:
+      - { name: kernel.event_listener, event: kernel.controller }

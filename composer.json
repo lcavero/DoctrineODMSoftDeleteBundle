@@ -1,0 +1,45 @@
+{
+    "name": "lcv/doctrine-odm-softdelete-bundle",
+    "type": "symfony-bundle",
+    "description": "Soft delete utilities with Doctrine ODM",
+    "keywords": [
+        "soft",
+        "soft-delete",
+        "delete",
+        "softdelete",
+        "odm"
+    ],
+    "homepage": "https://github.com/lcavero/DoctrineODMSoftDeleteBundle.git",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Luis Cavero Martínez",
+            "email": "luiscaverodeveloper@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^7.2",
+        "ext-intl": "*",
+        "doctrine/annotations": "^1.0",
+        "doctrine/mongodb-odm-bundle": "~4.0",
+        "jms/serializer-bundle": "^3.4",
+        "lcv/common-exceptions": "^1.0",
+        "symfony/form": "~4.3",
+        "symfony/framework-bundle": "~4.3",
+        "symfony/polyfill-intl-messageformatter": "^1.12",
+        "symfony/translation": "~4.3"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "LCV\\DoctrineODMSoftDeleteBundle\\": ""
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    }
+}

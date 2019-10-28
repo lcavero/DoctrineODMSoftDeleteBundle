@@ -5,5 +5,13 @@ services:
     tags:
       - { name: kernel.event_listener, event: kernel.controller }
 
-  LCV\DoctrineODMSoftDeleteBundle\Formulary\SoftDeleteValidator:
-  LCV\DoctrineODMSoftDeleteBundle\Manager\SoftDeleteManager:
+  lcv.soft_delete_manager:
+    class: LCV\DoctrineODMSoftDeleteBundle\Manager\SoftDeleteManager
+    arguments: ["@doctrine_mongodb.odm.default_document_manager"]
+
+
+  lcv.soft_delete_validator:
+    class: LCV\DoctrineODMSoftDeleteBundle\Formulary\SoftDeleteValidator
+    arguments: ["@lcv.soft_delete_manager", "@translator.default"]
+
+  LCV\DoctrineODMSoftDeleteBundle\Formulary\SoftDeleteValidator: '@lcv.soft_delete_validator'

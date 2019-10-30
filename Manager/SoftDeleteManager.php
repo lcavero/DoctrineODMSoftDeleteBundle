@@ -107,7 +107,7 @@ class SoftDeleteManager
                 $existent = $this->dm->getRepository($this->getClassMetadata(get_class($document))->getName())
                     ->findOneBy([$document->getUniqueKeyName() => $document->getUniqueKeyValue()]);
                 if($existent && $existent->getId() != $document->getId()){
-                    $document->setUniqueKeyValue($document->getUniqueKeyValue() . ' RESTORED-' . date('Y-m-d H:i:s'));
+                    $document->setUniqueKeyValue($document->getUniqueKeyValue() . ' RESTORED-' . $document->getId() .  '-' . date('Y-m-d H:i:s'));
                 }
             } catch (\Exception $e){
                 throw $e;

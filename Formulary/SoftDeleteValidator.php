@@ -4,10 +4,9 @@
 namespace LCV\DoctrineODMSoftDeleteBundle\Formulary;
 
 use Exception;
-use LCV\DoctrineODMSoftDeleteBundle\Interfaces\UniqueSoftDeleteable;
 use LCV\DoctrineODMSoftDeleteBundle\Manager\ArchiveManager;
 use Symfony\Component\Form\FormError;
-use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SoftDeleteValidator
@@ -22,28 +21,30 @@ class SoftDeleteValidator
     }
 
     /**
-     * @param FormEvent $event
+     * @param FormInterface $form
+     * @param $uniqueKey
+     * @param string $uniqueKeyInUseTranslation
      * @param bool $excludeArchived
      * @throws Exception
      */
-    public function validateUniqueKey(FormEvent $event, $excludeArchived = true)
+    public function validateUniqueKey(FormInterface $form, $uniqueKey, $uniqueKeyInUseTranslation = 'keyName_in_use', $excludeArchived = true)
     {
-        $document = $event->getData();
-        if($document instanceof UniqueSoftDeleteable){
-            if($document->getUniqueKeyValue()){
-                /** @var UniqueSoftDeleteable $existingDocument */
-                $existingDocument = $this->am->findOneBy(
-                    $this->am->getDocumentManager()->getClassMetadata(get_class($document))->getName(),
-                    [$document->getUniqueKeyName() => $document->getUniqueKeyValue()],
-                    $excludeArchived
+        $data = $form->getData();
+        if($data){
+            $document = $form->getRoot()->getData();
+            $documentName = $this->am->getDocumentManager()->getClassMetadata(get_class($document))->getName();
+            $existingDocument = $this->am->findOneBy(
+                $documentName,
+                [$uniqueKey => $document->$uniqueKey],
+                $excludeArchived
+            );
+
+            if($existingDocument != null && ($existingDocument->getId() != $document->getId())){
+                $form->addError(
+                    new FormError($this->translator->trans(
+                       $uniqueKeyInUseTranslation, ['key' => $uniqueKey, 'value' => $document->$uniqueKey], 'validators')
+                    )
                 );
-                if($existingDocument != null && ($existingDocument->getId() != $document->getId())){
-                    $event->getForm()->addError(
-                        new FormError($this->translator->trans(
-                            $document->getUniqueKeyInUseTranslation(), [], 'validators')
-                        )
-                    );
-                }
             }
         }
     }

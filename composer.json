@@ -27,7 +27,8 @@
         "symfony/form": "~4.3",
         "symfony/framework-bundle": "~4.3",
         "symfony/polyfill-intl-messageformatter": "^1.12",
-        "symfony/translation": "~4.3"
+        "symfony/translation": "~4.3",
+         "ext-mongodb": "*"
     },
     "config": {
         "sort-packages": true

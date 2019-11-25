@@ -3,6 +3,7 @@
 
 namespace LCV\DoctrineODMSoftDeleteBundle\Document;
 
+use DateTime;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use JMS\Serializer\Annotation as Serializer;
 use LCV\DoctrineODMSoftDeleteBundle\Interfaces\SoftDeleteable;
@@ -15,47 +16,49 @@ abstract class SoftDeleteableDocument implements SoftDeleteable
 {
     /**
      * @MongoDB\Field(type="date")
+     * @Serializer\Groups({"COMMON.created"})
      */
     protected $created;
 
     /**
      * @MongoDB\Field(type="date")
+     * @Serializer\Exclude()
      */
     protected $updated;
 
     /**
      * @MongoDB\Field(type="date")
      * @MongoDB\Index
-     * @Serializer\Groups({"COMMON.deletion"})
+     * @Serializer\Groups({"COMMON.archived"})
      */
-    protected $deletedAt;
+    protected $archivedAt;
 
     /**
      * @MongoDB\Field(type="date")
      * @MongoDB\Index
-     * @Serializer\Groups({"COMMON.deletion"})
+     * @Serializer\Exclude()
      */
     protected $deleteOn;
 
 
-    public function getCreated(): \DateTime
+    public function getCreated(): DateTime
     {
         return $this->created;
     }
 
-    public function getUpdated(): \DateTime
+    public function getUpdated(): DateTime
     {
         return $this->updated;
     }
 
-    public function getDeletedAt()
+    public function getArchivedAt()
     {
-        return $this->deletedAt;
+        return $this->archivedAt;
     }
 
-    public function setDeletedAt($date)
+    public function setArchivedAt($date)
     {
-        $this->deletedAt = $date;
+        $this->archivedAt = $date;
     }
 
     public function getDeleteOn()

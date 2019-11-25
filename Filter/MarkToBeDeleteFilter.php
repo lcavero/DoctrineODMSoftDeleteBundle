@@ -7,13 +7,13 @@ use Doctrine\ODM\MongoDB\Mapping\ClassMetadata;
 use Doctrine\ODM\MongoDB\Query\Filter\BsonFilter;
 use LCV\DoctrineODMSoftDeleteBundle\Interfaces\SoftDeleteable;
 
-class SoftDeleteFilter extends BsonFilter
+class MarkToBeDeleteFilter extends BsonFilter
 {
     public function addFilterCriteria(ClassMetadata $class): array
     {
         if(!(class_implements($class->reflClass, SoftDeleteable::class))){
             return [];
         }
-        return ['archivedAt' => null];
+        return ['deleteOn' => null];
     }
 }

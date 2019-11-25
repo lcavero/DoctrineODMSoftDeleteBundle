@@ -29,7 +29,7 @@ class SoftDeleteValidator
      * @param bool $excludeArchived
      * @throws Exception
      */
-    public function validateUniqueKey(FormInterface $form, $uniqueKey, $uniqueKeyInUseTranslation, $excludeArchived = true)
+    public function validateUniqueKey(FormInterface $form, $uniqueKey, $uniqueKeyInUseTranslation = "", $excludeArchived = true)
     {
         $data = $form->getData();
         if($data){

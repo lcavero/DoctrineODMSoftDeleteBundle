@@ -5,6 +5,7 @@ namespace LCV\DoctrineODMSoftDeleteBundle\Formulary;
 
 use Exception;
 use LCV\DoctrineODMSoftDeleteBundle\Manager\ArchiveManager;
+use MongoDB\BSON\Regex;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -35,7 +36,7 @@ class SoftDeleteValidator
             $documentName = $this->am->getDocumentManager()->getClassMetadata(get_class($document))->getName();
             $existingDocument = $this->am->findOneBy(
                 $documentName,
-                [$uniqueKey => $document->$uniqueKey],
+                [$uniqueKey => new Regex('^' . trim($document->$uniqueKey) . '$', 'i')],
                 $excludeArchived
             );
 

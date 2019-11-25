@@ -260,7 +260,7 @@ class ArchiveManager
             }
             $existentDocument = $this->findOneBy(
                 $this->dm->getClassMetadata(get_class($document))->getName(),
-                [$document->getUniqueKeyName() => new Regex('^' . $newUniqueKeyValue . '$', 'i')],
+                [$document->getUniqueKeyName() => new Regex('^' . trim($newUniqueKeyValue) . '$', 'i')],
                 true
             );
 

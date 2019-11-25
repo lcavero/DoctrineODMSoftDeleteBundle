@@ -3,14 +3,20 @@
 
 namespace LCV\DoctrineODMSoftDeleteBundle\Manager;
 
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
+use Doctrine\Common\Persistence\Mapping\ClassMetadataFactory;
+use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Common\Persistence\ObjectRepository;
 use Doctrine\ODM\MongoDB\DocumentManager;
+use Doctrine\ODM\MongoDB\LockException;
 use Doctrine\ODM\MongoDB\MongoDBException;
 use Exception;
+use LCV\CommonExceptions\Exception\ApiException;
 use LCV\DoctrineODMSoftDeleteBundle\Interfaces\SoftDeleteable;
 use LCV\DoctrineODMSoftDeleteBundle\Interfaces\UniqueSoftDeleteable;
 use MongoDB\BSON\Regex;
 
-class ArchiveManager
+class ArchiveManager implements ObjectManager
 {
     private $dm;
 
@@ -222,12 +228,17 @@ class ArchiveManager
      *
      * Marca un documento listo para su eliminación
      */
-    public function delete(SoftDeleteable $document)
+    public function remove($document)
     {
-        if(!$document->getDeleteOn()){
-            $document->setDeleteOn(new \DateTime("+1day"));
+        if($document instanceof SoftDeleteable){
+            if(!$document->getDeleteOn()){
+                $document->setDeleteOn(new \DateTime("+1day"));
+            }
+            $document->onDelete($this);
+        }else{
+            throw new ApiException(500, 'Document should implements Softdeleteable');
         }
-        $document->onDelete($this);
+
     }
 
     /**
@@ -271,15 +282,6 @@ class ArchiveManager
     }
 
     /**
-     * @param array $options
-     * @throws MongoDBException
-     */
-    public function flush($options = [])
-    {
-        $this->dm->flush($options);
-    }
-
-    /**
      * Habilita el filtro Soft delete
      */
     private function enableSoftDeleteFilter()
@@ -305,5 +307,157 @@ class ArchiveManager
     {
         $fc = $this->dm->getFilterCollection();
         (!$enabled) ? $fc->disable('soft_delete') : $fc->enable('soft_delete');
+    }
+
+    /**
+     * Tells the ObjectManager to make an instance managed and persistent.
+     *
+     * The object will be entered into the database as a result of the flush operation.
+     *
+     * NOTE: The persist operation always considers objects that are not yet known to
+     * this ObjectManager as NEW. Do not pass detached objects to the persist operation.
+     *
+     * @param object $object The instance to make managed and persistent.
+     *
+     * @return void
+     */
+    public function persist($object)
+    {
+        $this->dm->persist($object);
+    }
+
+    /**
+     * @param array $options
+     * @throws MongoDBException
+     */
+    public function flush($options = [])
+    {
+        $this->dm->flush($options);
+    }
+
+    /**
+     * Merges the state of a detached object into the persistence context
+     * of this ObjectManager and returns the managed copy of the object.
+     * The object passed to merge will not become associated/managed with this ObjectManager.
+     *
+     * @param object $object
+     *
+     * @return object
+     * @throws LockException
+     * @deprecated Merge operation is deprecated and will be removed in Persistence 2.0.
+     *             Merging should be part of the business domain of an application rather than
+     *             a generic operation of ObjectManager.
+     */
+    public function merge($object)
+    {
+        return $this->dm->merge($object);
+    }
+
+    /**
+     * Clears the ObjectManager. All objects that are currently managed
+     * by this ObjectManager become detached.
+     *
+     * @param string|null $objectName if given, only objects of this type will get detached.
+     *
+     * @return void
+     */
+    public function clear($objectName = null)
+    {
+        $this->dm->clear($objectName);
+    }
+
+    /**
+     * Detaches an object from the ObjectManager, causing a managed object to
+     * become detached. Unflushed changes made to the object if any
+     * (including removal of the object), will not be synchronized to the database.
+     * Objects which previously referenced the detached object will continue to
+     * reference it.
+     *
+     * @param object $object The object to detach.
+     *
+     * @return void
+     * @deprecated Detach operation is deprecated and will be removed in Persistence 2.0. Please use
+     *             {@see ObjectManager::clear()} instead.
+     *
+     */
+    public function detach($object)
+    {
+        $this->dm->detach($object);
+    }
+
+    /**
+     * Refreshes the persistent state of an object from the database,
+     * overriding any local changes that have not yet been persisted.
+     *
+     * @param object $object The object to refresh.
+     *
+     * @return void
+     */
+    public function refresh($object)
+    {
+        $this->dm->refresh($object);
+    }
+
+    /**
+     * Gets the repository for a class.
+     *
+     * @param string $className
+     *
+     * @return ObjectRepository
+     */
+    public function getRepository($className)
+    {
+        return $this->dm->getRepository($className);
+    }
+
+    /**
+     * Returns the ClassMetadata descriptor for a class.
+     *
+     * The class name must be the fully-qualified class name without a leading backslash
+     * (as it is returned by get_class($obj)).
+     *
+     * @param string $className
+     *
+     * @return ClassMetadata
+     */
+    public function getClassMetadata($className)
+    {
+        return $this->dm->getClassMetadata($className);
+    }
+
+    /**
+     * Gets the metadata factory used to gather the metadata of classes.
+     *
+     * @return ClassMetadataFactory
+     */
+    public function getMetadataFactory()
+    {
+        return $this->dm->getMetadataFactory();
+    }
+
+    /**
+     * Helper method to initialize a lazy loading proxy or persistent collection.
+     *
+     * This method is a no-op for other objects.
+     *
+     * @param object $obj
+     *
+     * @return void
+     */
+    public function initializeObject($obj)
+    {
+        $this->dm->initializeObject($obj);
+    }
+
+    /**
+     * Checks if the object is part of the current UnitOfWork and therefore managed.
+     *
+     * @param object $object
+     *
+     * @return bool
+     */
+    public function contains($object)
+    {
+        return $this->dm->contains($object);
     }
 }

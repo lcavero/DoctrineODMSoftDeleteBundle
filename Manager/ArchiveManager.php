@@ -224,10 +224,10 @@ class ArchiveManager
      */
     public function delete(SoftDeleteable $document)
     {
-        $document->onDelete($this);
         if(!$document->getDeleteOn()){
             $document->setDeleteOn(new \DateTime("+1day"));
         }
+        $document->onDelete($this);
     }
 
     /**
@@ -238,8 +238,8 @@ class ArchiveManager
      */
     public function archive(SoftDeleteable $document)
     {
-        $document->onArchive($this);
         $document->setArchivedAt(new \DateTime());
+        $document->onArchive($this);
     }
 
     /**
@@ -251,8 +251,8 @@ class ArchiveManager
      */
     public function restore(SoftDeleteable $document, $newUniqueKeyValue = null)
     {
-        $document->onRestore($this);
         $document->setArchivedAt(null);
+        $document->onRestore($this);
 
         if($document instanceof UniqueSoftDeleteable){
             if(!$newUniqueKeyValue){

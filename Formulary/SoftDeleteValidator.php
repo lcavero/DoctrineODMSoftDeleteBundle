@@ -4,6 +4,7 @@
 namespace LCV\DoctrineODMSoftDeleteBundle\Formulary;
 
 use Exception;
+use LCV\DoctrineODMSoftDeleteBundle\Interfaces\UniqueSoftDeleteable;
 use LCV\DoctrineODMSoftDeleteBundle\Manager\ArchiveManager;
 use MongoDB\BSON\Regex;
 use Symfony\Component\Form\FormError;
@@ -28,7 +29,7 @@ class SoftDeleteValidator
      * @param bool $excludeArchived
      * @throws Exception
      */
-    public function validateUniqueKey(FormInterface $form, $uniqueKey, $uniqueKeyInUseTranslation = 'keyName_in_use', $excludeArchived = true)
+    public function validateUniqueKey(FormInterface $form, $uniqueKey, $uniqueKeyInUseTranslation, $excludeArchived = true)
     {
         $data = $form->getData();
         if($data){
@@ -41,9 +42,17 @@ class SoftDeleteValidator
             );
 
             if($existingDocument != null && ($existingDocument->getId() != $document->getId())){
+                $translation = $uniqueKeyInUseTranslation;
+                if(!$translation){
+                    if($document instanceof UniqueSoftDeleteable){
+                        $translation = $document->getUniqueKeyInUseTranslation();
+                    }else{
+                        $translation = 'keyName_in_use';
+                    }
+                }
                 $form->addError(
                     new FormError($this->translator->trans(
-                       $uniqueKeyInUseTranslation, ['key' => $uniqueKey, 'value' => $document->$uniqueKey], 'validators')
+                       $translation, ['key' => $uniqueKey, 'value' => $document->$uniqueKey], 'validators')
                     )
                 );
             }

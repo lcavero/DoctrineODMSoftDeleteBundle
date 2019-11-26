@@ -58,4 +58,41 @@ class SoftDeleteValidator
             }
         }
     }
+
+    /**
+     * @param FormInterface $form
+     * @param $documentName
+     * @param $uniqueKey
+     * @param string $uniqueKeyInUseTranslation
+     * @param bool $excludeArchived
+     * @throws Exception
+     */
+    public function validateForeignUniqueKey(FormInterface $form, $documentName, $uniqueKey, $uniqueKeyInUseTranslation = "", $excludeArchived = true)
+    {
+        $data = $form->getData();
+        if($data){
+            $document = $form->getRoot()->getData();
+            $existingDocument = $this->am->findOneBy(
+                $documentName,
+                [$uniqueKey => new Regex('^' . trim($document->$uniqueKey) . '$', 'i')],
+                $excludeArchived
+            );
+
+            if($existingDocument != null && ($existingDocument->getId() != $document->getId())){
+                $translation = $uniqueKeyInUseTranslation;
+                if(!$translation){
+                    if($document instanceof UniqueSoftDeleteable){
+                        $translation = $document->getUniqueKeyInUseTranslation();
+                    }else{
+                        $translation = 'keyName_in_use';
+                    }
+                }
+                $form->addError(
+                    new FormError($this->translator->trans(
+                        $translation, ['key' => $uniqueKey, 'value' => $document->$uniqueKey], 'validators')
+                    )
+                );
+            }
+        }
+    }
 }

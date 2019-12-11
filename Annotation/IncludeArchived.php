@@ -7,10 +7,10 @@ use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
- * Class IgnoreSoftDelete
+ * Class IncludeArchived
  * @package LCV\DoctrineODMSoftDeleteBundle\Annotation
  *
  * @Annotation
  * @Target("METHOD")
  */
-class IgnoreSoftDelete extends Annotation { }
+class IncludeArchived extends Annotation { }

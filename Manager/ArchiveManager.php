@@ -3,6 +3,7 @@
 
 namespace LCV\DoctrineODMSoftDeleteBundle\Manager;
 
+use DateTime;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\Common\Persistence\Mapping\ClassMetadataFactory;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -12,8 +13,9 @@ use Doctrine\ODM\MongoDB\LockException;
 use Doctrine\ODM\MongoDB\MongoDBException;
 use Exception;
 use LCV\CommonExceptions\Exception\ApiException;
-use LCV\DoctrineODMSoftDeleteBundle\Interfaces\SoftDeleteable;
-use LCV\DoctrineODMSoftDeleteBundle\Interfaces\UniqueSoftDeleteable;
+use LCV\DoctrineODMSoftDeleteBundle\Document\ArchivableDocument;
+use LCV\DoctrineODMSoftDeleteBundle\Document\SoftDeleteableDocument;
+use LCV\DoctrineODMSoftDeleteBundle\Interfaces\Unique;
 use MongoDB\BSON\Regex;
 
 class ArchiveManager implements ObjectManager
@@ -40,7 +42,7 @@ class ArchiveManager implements ObjectManager
      */
     public function findArchived($documentName, $id)
     {
-        $enabled = $this->dm->getFilterCollection()->isEnabled('soft_delete');
+        $enabled = $this->dm->getFilterCollection()->isEnabled('archivable');
         try{
             $this->disableSoftDeleteFilter();
             return $this->dm->getRepository($documentName)->findOneBy(
@@ -65,7 +67,7 @@ class ArchiveManager implements ObjectManager
      */
     public function find($documentName, $id, $excludeArchived = false)
     {
-        $enabled = $this->dm->getFilterCollection()->isEnabled('soft_delete');
+        $enabled = $this->dm->getFilterCollection()->isEnabled('archivable');
 
         try{
             if($excludeArchived){
@@ -91,7 +93,7 @@ class ArchiveManager implements ObjectManager
      */
     public function findArchivedBy($documentName, array $criteria)
     {
-        $enabled = $this->dm->getFilterCollection()->isEnabled('soft_delete');
+        $enabled = $this->dm->getFilterCollection()->isEnabled('archivable');
         try{
             $this->disableSoftDeleteFilter();
             $criteria['archivedAt'] = new Regex('\.+');
@@ -114,7 +116,7 @@ class ArchiveManager implements ObjectManager
      */
     public function findBy($documentName, array $criteria, $excludeArchived = false)
     {
-        $enabled = $this->dm->getFilterCollection()->isEnabled('soft_delete');
+        $enabled = $this->dm->getFilterCollection()->isEnabled('archivable');
         try{
             if($excludeArchived){
                 $this->enableSoftDeleteFilter();
@@ -138,7 +140,7 @@ class ArchiveManager implements ObjectManager
      */
     public function findAllArchived($documentName)
     {
-        $enabled = $this->dm->getFilterCollection()->isEnabled('soft_delete');
+        $enabled = $this->dm->getFilterCollection()->isEnabled('archivable');
         try{
             $this->disableSoftDeleteFilter();
             return $this->dm->getRepository($documentName)->findBy(['archivedAt' => new Regex('\.+')]);
@@ -159,7 +161,7 @@ class ArchiveManager implements ObjectManager
      */
     public function findAll($documentName, $excludeArchived = false)
     {
-        $enabled = $this->dm->getFilterCollection()->isEnabled('soft_delete');
+        $enabled = $this->dm->getFilterCollection()->isEnabled('archivable');
         try{
             if($excludeArchived){
                 $this->enableSoftDeleteFilter();
@@ -184,7 +186,7 @@ class ArchiveManager implements ObjectManager
      */
     public function findOneArchivedBy($documentName, array $criteria)
     {
-        $enabled = $this->dm->getFilterCollection()->isEnabled('soft_delete');
+        $enabled = $this->dm->getFilterCollection()->isEnabled('archivable');
         try{
             $this->disableSoftDeleteFilter();
             $criteria['archivedAt'] = new Regex('\.+');
@@ -207,7 +209,7 @@ class ArchiveManager implements ObjectManager
      */
     public function findOneBy($documentName, array $criteria, $excludeArchived = false)
     {
-        $enabled = $this->dm->getFilterCollection()->isEnabled('soft_delete');
+        $enabled = $this->dm->getFilterCollection()->isEnabled('archivable');
         try{
             if($excludeArchived){
                 $this->enableSoftDeleteFilter();
@@ -223,16 +225,16 @@ class ArchiveManager implements ObjectManager
     }
 
     /**
-     * @param SoftDeleteable $document
+     * @param SoftDeleteableDocument $document
      * @throws Exception
      *
      * Marca un documento listo para su eliminación
      */
     public function remove($document)
     {
-        if($document instanceof SoftDeleteable){
+        if($document instanceof SoftDeleteableDocument){
             if(!$document->getDeleteOn()){
-                $document->setDeleteOn(new \DateTime("+1day"));
+                $document->setDeleteOn(new DateTime("+1day"));
             }
             $document->onDelete($this);
         }else{
@@ -242,30 +244,30 @@ class ArchiveManager implements ObjectManager
     }
 
     /**
-     * @param SoftDeleteable $document
+     * @param ArchivableDocument $document
      * @throws Exception
      *
      * Archiva un documento
      */
-    public function archive(SoftDeleteable $document)
+    public function archive(ArchivableDocument $document)
     {
-        $document->setArchivedAt(new \DateTime());
+        $document->setArchivedAt(new DateTime());
         $document->onArchive($this);
     }
 
     /**
-     * @param SoftDeleteable $document
+     * @param ArchivableDocument $document
      * @param null $newUniqueKeyValue
      * @throws Exception
      *
      * Restaura un documento archivado
      */
-    public function restore(SoftDeleteable $document, $newUniqueKeyValue = null)
+    public function restore(ArchivableDocument $document, $newUniqueKeyValue = null)
     {
         $document->setArchivedAt(null);
         $document->onRestore($this);
 
-        if($document instanceof UniqueSoftDeleteable){
+        if($document instanceof Unique){
             if(!$newUniqueKeyValue){
                 $newUniqueKeyValue = $document->getUniqueKeyValue();
             }
@@ -276,7 +278,7 @@ class ArchiveManager implements ObjectManager
             );
 
             if($existentDocument && ($existentDocument->getId() != $document->getId())){
-                $document->setUniqueKeyValue('RESTORED - ' . $newUniqueKeyValue . ' - ' . $document->getId() . (new \DateTime())->getTimestamp());
+                $document->setUniqueKeyValue('RESTORED - ' . $newUniqueKeyValue . ' - ' . $document->getId() . (new DateTime())->getTimestamp());
             }
         }
     }
@@ -287,7 +289,7 @@ class ArchiveManager implements ObjectManager
     private function enableSoftDeleteFilter()
     {
         $fc = $this->dm->getFilterCollection();
-        if(!$fc->isEnabled('soft_delete'))  $fc->enable('soft_delete');
+        if(!$fc->isEnabled('archivable'))  $fc->enable('archivable');
     }
 
     /**
@@ -296,7 +298,7 @@ class ArchiveManager implements ObjectManager
     private function disableSoftDeleteFilter()
     {
         $fc = $this->dm->getFilterCollection();
-        if($fc->isEnabled('soft_delete'))  $fc->disable('soft_delete');
+        if($fc->isEnabled('archivable'))  $fc->disable('archivable');
     }
 
     /**
@@ -306,7 +308,7 @@ class ArchiveManager implements ObjectManager
     private function restoreFilter($enabled)
     {
         $fc = $this->dm->getFilterCollection();
-        (!$enabled) ? $fc->disable('soft_delete') : $fc->enable('soft_delete');
+        (!$enabled) ? $fc->disable('archivable') : $fc->enable('archivable');
     }
 
     /**

@@ -9,7 +9,7 @@ use Doctrine\ODM\MongoDB\DocumentManager;
 use ReflectionObject;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 
-class IgnoreSoftDeleteListener
+class IncludeArchivedListener
 {
     private $reader;
     private $dm;
@@ -44,10 +44,10 @@ class IgnoreSoftDeleteListener
     }
 
     private function ignoreSoftDeleteAnnotation($controller, $method) {
-        static $class = IgnoreSoftDelete::class;
+        static $class = IncludeArchived::class;
 
         if ($this->readAnnotation($controller, $method, $class)) {
-            $this->dm->getFilterCollection()->disable('soft_delete');
+            $this->dm->getFilterCollection()->disable('archive');
         }
     }
 

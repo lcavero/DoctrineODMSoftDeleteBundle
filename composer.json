@@ -20,15 +20,16 @@
     "require": {
         "php": "^7.2",
         "ext-intl": "*",
+        "ext-mongodb": "*",
         "doctrine/annotations": "^1.0",
         "doctrine/mongodb-odm-bundle": "~4.0",
+        "gedmo/doctrine-extensions": "^2.4",
         "jms/serializer-bundle": "^3.4",
         "lcv/common-exceptions": "^1.0",
         "symfony/form": "~4.3",
         "symfony/framework-bundle": "~4.3",
         "symfony/polyfill-intl-messageformatter": "^1.12",
-        "symfony/translation": "~4.3",
-         "ext-mongodb": "*"
+        "symfony/translation": "~4.3"
     },
     "config": {
         "sort-packages": true

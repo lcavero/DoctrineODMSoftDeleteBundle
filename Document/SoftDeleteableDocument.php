@@ -41,5 +41,8 @@ abstract class SoftDeleteableDocument extends TimestampableDocument
     /**
      * @param ArchiveManager $archiveManager
      */
-    public abstract function onDelete(ArchiveManager $archiveManager): void;
+    public function onDelete(ArchiveManager $archiveManager): void
+    {
+        return;
+    }
 }

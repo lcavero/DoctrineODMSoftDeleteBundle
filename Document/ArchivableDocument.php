@@ -41,10 +41,16 @@ abstract class ArchivableDocument extends SoftDeleteableDocument
     /**
      * @param ArchiveManager $archiveManager
      */
-    public abstract function onArchive(ArchiveManager $archiveManager): void;
+    public function onArchive(ArchiveManager $archiveManager): void
+    {
+        return;
+    }
 
     /**
      * @param ArchiveManager $archiveManager
      */
-    public abstract function onRestore(ArchiveManager $archiveManager): void;
+    public function onRestore(ArchiveManager $archiveManager): void
+    {
+        return;
+    }
 }

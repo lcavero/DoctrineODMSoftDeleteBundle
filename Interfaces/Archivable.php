@@ -12,9 +12,9 @@ use LCV\DoctrineODMSoftDeleteBundle\Manager\ArchiveManager;
 interface Archivable
 {
     /**
-     * @return string
+     * @return string|null
      */
-    public function getId(): string;
+    public function getId(): ?string;
 
     /**
      * @return DateTime|null

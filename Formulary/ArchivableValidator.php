@@ -24,18 +24,22 @@ class ArchivableValidator
 
     /**
      * @param FormInterface $form
-     * @param $uniqueKey
      * @param string $uniqueKeyInUseTranslation
      * @param bool $excludeArchived
      * @throws Exception
      */
-    public function validateOwnedUniqueKey(FormInterface $form, $uniqueKey, $uniqueKeyInUseTranslation = "", $excludeArchived = true)
+    public function validateOwnedUniqueKey(FormInterface $form, $uniqueKeyInUseTranslation = "", $excludeArchived = true)
     {
         $data = $form->getData();
         if($data){
+            /** @var Unique $document */
             $document = $form->getRoot()->getData();
             $documentName = $this->am->getDocumentManager()->getClassMetadata(get_class($document))->getName();
-            $this->validateUniqueKey($form, $document, $documentName, $uniqueKey, $uniqueKeyInUseTranslation, $excludeArchived);
+            $uniqueKey = $document->getUniqueKeyName();
+            $uniqueKeyValue = $document->getUniqueKeyValue();
+            $uniqueKeyInUseTranslation = $uniqueKeyInUseTranslation ?: $document->getUniqueKeyInUseTranslation();
+
+            $this->validateUniqueKey($form, $documentName, $uniqueKey, $uniqueKeyValue, $uniqueKeyInUseTranslation, $excludeArchived, $document->getId());
         }
     }
 
@@ -51,40 +55,37 @@ class ArchivableValidator
     {
         $data = $form->getData();
         if($data){
-            $document = $form->getRoot()->getData();
-            $this->validateUniqueKey($form, $document, $documentName, $uniqueKey, $uniqueKeyInUseTranslation, $excludeArchived);
+            $this->validateUniqueKey($form, $documentName, $uniqueKey, $data, $uniqueKeyInUseTranslation, $excludeArchived);
         }
     }
 
     /**
      * @param FormInterface $form
-     * @param $document
      * @param $documentName
      * @param $uniqueKey
+     * @param $uniqueKeyValue
      * @param $uniqueKeyInUseTranslation
      * @param $excludeArchived
+     * @param $ownedId
      * @throws Exception
      */
-    private function validateUniqueKey(FormInterface $form, $document, $documentName, $uniqueKey, $uniqueKeyInUseTranslation, $excludeArchived)
+    private function validateUniqueKey(FormInterface $form, $documentName, $uniqueKey, $uniqueKeyValue, $uniqueKeyInUseTranslation, $excludeArchived, $ownedId = null)
     {
         $existingDocument = $this->am->findOneBy(
             $documentName,
-            [$uniqueKey => new Regex('^' . trim($document->$uniqueKey) . '$', 'i')],
+            [$uniqueKey => new Regex('^' . trim($uniqueKeyValue) . '$', 'i')],
             $excludeArchived
         );
 
-        if($existingDocument != null && ($existingDocument->getId() != $document->getId())){
+
+        if($existingDocument != null && (!$ownedId || ($existingDocument->getId() != $ownedId))){
             $translation = $uniqueKeyInUseTranslation;
             if(!$translation){
-                if($document instanceof Unique){
-                    $translation = $document->getUniqueKeyInUseTranslation();
-                }else{
-                    $translation = 'keyName_in_use';
-                }
+                $translation = 'keyName_in_use';
             }
             $form->addError(
                 new FormError($this->translator->trans(
-                    $translation, ['key' => $uniqueKey, 'value' => $document->$uniqueKey], 'validators')
+                    $translation, ['key' => $uniqueKey, 'value' => $uniqueKeyValue], 'validators')
                 )
             );
         }

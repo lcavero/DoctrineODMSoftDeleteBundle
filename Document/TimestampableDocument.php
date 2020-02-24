@@ -7,12 +7,13 @@ use DateTime;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use JMS\Serializer\Annotation as Serializer;
 use Gedmo\Mapping\Annotation as Gedmo;
+use LCV\DoctrineODMSoftDeleteBundle\Interfaces\Identitable;
 
 /**
  * Class TimestampableDocument
  * @MongoDB\MappedSuperclass()
  */
-abstract class TimestampableDocument
+abstract class TimestampableDocument implements Identitable
 {
     /**
      * @var string

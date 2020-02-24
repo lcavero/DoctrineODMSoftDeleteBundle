@@ -14,6 +14,7 @@ use Doctrine\ODM\MongoDB\MongoDBException;
 use Exception;
 use LCV\CommonExceptions\Exception\ApiException;
 use LCV\DoctrineODMSoftDeleteBundle\Interfaces\Archivable;
+use LCV\DoctrineODMSoftDeleteBundle\Interfaces\Identitable;
 use LCV\DoctrineODMSoftDeleteBundle\Interfaces\PostDeletable;
 use LCV\DoctrineODMSoftDeleteBundle\Interfaces\Unique;
 use MongoDB\BSON\Regex;
@@ -256,7 +257,7 @@ class ArchiveManager implements ObjectManager
     }
 
     /**
-     * @param Archivable $document
+     * @param Archivable|Identitable $document
      * @param null $newUniqueKeyValue
      * @throws Exception
      *

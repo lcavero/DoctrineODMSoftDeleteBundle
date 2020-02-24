@@ -4,6 +4,7 @@
 namespace LCV\DoctrineODMSoftDeleteBundle\Formulary;
 
 use Exception;
+use LCV\DoctrineODMSoftDeleteBundle\Interfaces\Identitable;
 use LCV\DoctrineODMSoftDeleteBundle\Interfaces\Unique;
 use LCV\DoctrineODMSoftDeleteBundle\Manager\ArchiveManager;
 use MongoDB\BSON\Regex;
@@ -32,7 +33,7 @@ class ArchivableValidator
     {
         $data = $form->getData();
         if($data){
-            /** @var Unique $document */
+            /** @var Unique|Identitable $document */
             $document = $form->getRoot()->getData();
             $documentName = $this->am->getDocumentManager()->getClassMetadata(get_class($document))->getName();
             $uniqueKey = $document->getUniqueKeyName();

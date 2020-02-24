@@ -6,7 +6,6 @@ namespace LCV\DoctrineODMSoftDeleteBundle\Interfaces;
 
 interface Unique
 {
-
     /**
      * @return string
      */

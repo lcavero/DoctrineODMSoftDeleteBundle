@@ -11,7 +11,6 @@ use LCV\DoctrineODMSoftDeleteBundle\Manager\ArchiveManager;
  */
 interface PostDeletable
 {
-
     /**
      * @return DateTime|null
      */

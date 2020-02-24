@@ -12,11 +12,6 @@ use LCV\DoctrineODMSoftDeleteBundle\Manager\ArchiveManager;
 interface Archivable
 {
     /**
-     * @return string|null
-     */
-    public function getId(): ?string;
-
-    /**
      * @return DateTime|null
      */
     public function getArchivedAt(): ?DateTime;

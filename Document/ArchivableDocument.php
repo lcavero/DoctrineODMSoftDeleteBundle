@@ -6,13 +6,14 @@ namespace LCV\DoctrineODMSoftDeleteBundle\Document;
 use DateTime;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use JMS\Serializer\Annotation as Serializer;
+use LCV\DoctrineODMSoftDeleteBundle\Interfaces\Archivable;
 use LCV\DoctrineODMSoftDeleteBundle\Manager\ArchiveManager;
 
 /**
  * Class ArchivableDocument
  * @MongoDB\MappedSuperclass()
  */
-abstract class ArchivableDocument extends SoftDeleteableDocument
+abstract class ArchivableDocument extends PostDeletableDocument implements Archivable
 {
     /**
      * @var DateTime|null

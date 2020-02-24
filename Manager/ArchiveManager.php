@@ -13,8 +13,8 @@ use Doctrine\ODM\MongoDB\LockException;
 use Doctrine\ODM\MongoDB\MongoDBException;
 use Exception;
 use LCV\CommonExceptions\Exception\ApiException;
-use LCV\DoctrineODMSoftDeleteBundle\Document\ArchivableDocument;
-use LCV\DoctrineODMSoftDeleteBundle\Document\SoftDeleteableDocument;
+use LCV\DoctrineODMSoftDeleteBundle\Interfaces\Archivable;
+use LCV\DoctrineODMSoftDeleteBundle\Interfaces\PostDeletable;
 use LCV\DoctrineODMSoftDeleteBundle\Interfaces\Unique;
 use MongoDB\BSON\Regex;
 
@@ -225,44 +225,44 @@ class ArchiveManager implements ObjectManager
     }
 
     /**
-     * @param SoftDeleteableDocument $document
+     * @param $document
      * @throws Exception
      *
      * Marca un documento listo para su eliminación
      */
     public function remove($document)
     {
-        if($document instanceof SoftDeleteableDocument){
+        if($document instanceof PostDeletable){
             if(!$document->getDeleteOn()){
                 $document->setDeleteOn(new DateTime("+1day"));
             }
             $document->onDelete($this);
         }else{
-            throw new ApiException(500, 'Document should implements Softdeleteable');
+            throw new ApiException(500, 'Document should implements PostDeletable');
         }
 
     }
 
     /**
-     * @param ArchivableDocument $document
+     * @param Archivable $document
      * @throws Exception
      *
      * Archiva un documento
      */
-    public function archive(ArchivableDocument $document)
+    public function archive(Archivable $document)
     {
         $document->setArchivedAt(new DateTime());
         $document->onArchive($this);
     }
 
     /**
-     * @param ArchivableDocument $document
+     * @param Archivable $document
      * @param null $newUniqueKeyValue
      * @throws Exception
      *
      * Restaura un documento archivado
      */
-    public function restore(ArchivableDocument $document, $newUniqueKeyValue = null)
+    public function restore(Archivable $document, $newUniqueKeyValue = null)
     {
         $document->setArchivedAt(null);
         $document->onRestore($this);

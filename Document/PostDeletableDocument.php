@@ -10,10 +10,10 @@ use LCV\DoctrineODMSoftDeleteBundle\Interfaces\PostDeletable;
 use LCV\DoctrineODMSoftDeleteBundle\Manager\ArchiveManager;
 
 /**
- * Class SoftDeleteableDocument
+ * Class PostDeletableDocument
  * @MongoDB\MappedSuperclass()
  */
-abstract class SoftDeleteableDocument extends TimestampableDocument implements PostDeletable
+abstract class PostDeletableDocument extends TimestampableDocument implements PostDeletable
 {
     /**
      * @var DateTime|null

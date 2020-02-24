@@ -15,4 +15,5 @@ services:
     arguments: ["@lcv.archive_manager", "@translator.default"]
 
   LCV\DoctrineODMSoftDeleteBundle\Formulary\SoftDeleteValidator: '@lcv.soft_delete_validator'
+  LCV\DoctrineODMSoftDeleteBundle\Formulary\ArchivableValidator: '@lcv.soft_delete_validator'
   LCV\DoctrineODMSoftDeleteBundle\Manager\ArchiveManager: '@lcv.archive_manager'

@@ -47,7 +47,7 @@ class IncludeArchivedListener
         static $class = IncludeArchived::class;
 
         if ($this->readAnnotation($controller, $method, $class)) {
-            $this->dm->getFilterCollection()->disable('archive');
+            $this->dm->getFilterCollection()->disable('archivable');
         }
     }
 
